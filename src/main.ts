@@ -253,7 +253,7 @@ async function getCache(
   const client = getCacheClient()
   const cacheKey = getCacheKey(hash)
   const {data, status} = await client
-    .get(`/caches`, {
+    .get(`/cache`, {
       params: {
         keys: cacheKey,
         version: cacheVersion
@@ -268,7 +268,9 @@ async function getCache(
   }
   const [foundCacheKey, artifactTag] = String(data.cacheKey).split('#')
   if (foundCacheKey !== cacheKey) {
-    ctx.log.info(`Cache key mismatch: ${foundCacheKey} !== ${cacheKey}`)
+    ctx.log.info(
+      `Cache key mismatch: ${foundCacheKey} !== ${cacheKey} for ${data}`
+    )
     return null
   }
   const resp = await axios.get(data.archiveLocation, {

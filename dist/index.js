@@ -246,7 +246,7 @@ function getCache(ctx, hash) {
         const client = getCacheClient();
         const cacheKey = getCacheKey(hash);
         const { data, status } = yield client
-            .get(`/caches`, {
+            .get(`/cache`, {
             params: {
                 keys: cacheKey,
                 version: cacheVersion
@@ -261,7 +261,7 @@ function getCache(ctx, hash) {
         }
         const [foundCacheKey, artifactTag] = String(data.cacheKey).split('#');
         if (foundCacheKey !== cacheKey) {
-            ctx.log.info(`Cache key mismatch: ${foundCacheKey} !== ${cacheKey}`);
+            ctx.log.info(`Cache key mismatch: ${foundCacheKey} !== ${cacheKey} for ${data}`);
             return null;
         }
         const resp = yield axios_1.default.get(data.archiveLocation, {
