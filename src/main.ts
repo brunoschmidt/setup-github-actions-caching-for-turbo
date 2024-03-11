@@ -93,6 +93,38 @@ async function server(): Promise<void> {
     return {ok: true}
   })
 
+  // Touch cache artifact
+  fastify.post('/v8/artifacts/events', async () => {
+    // GHActions cache API doesn't support this endpoint
+    return {ok: true}
+  })
+
+  // Check cache status for the specified team
+  fastify.get('/v8/artifacts/status', async () => {
+    // GHActions cache API doesn't support this endpoint
+    return {status: 'enabled'}
+  })
+
+  // Check cache status for the specified artifact
+  fastify.head('/v8/artifacts/:hash', async (request, reply) => {
+    const hash = (request.params as {hash: string}).hash
+    request.log.info(`Status of artifact for ${hash}`)
+    const result = await getCache(request, hash)
+    if (result === null) {
+      reply.code(404)
+      return {ok: false}
+    }
+    const [size, , artifactTag] = result
+    if (size) {
+      reply.header('Content-Length', size)
+    }
+    reply.header('Content-Type', 'application/octet-stream')
+    if (artifactTag) {
+      reply.header('x-artifact-tag', artifactTag)
+    }
+    return reply.send(null)
+  })
+
   // Handle streaming request body
   // https://www.fastify.io/docs/latest/Reference/ContentTypeParser/#catch-all
   fastify.addContentTypeParser(
@@ -135,6 +167,7 @@ async function server(): Promise<void> {
     }
     return reply.send(stream)
   })
+
   await fastify.listen({port: serverPort})
 }
 

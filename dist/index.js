@@ -122,6 +122,35 @@ function server() {
             setTimeout(() => process.exit(0), 100);
             return { ok: true };
         }));
+        // Touch cache artifact
+        fastify.post('/v8/artifacts/events', () => __awaiter(this, void 0, void 0, function* () {
+            // GHActions cache API doesn't support this endpoint
+            return { ok: true };
+        }));
+        // Check cache status for the specified team
+        fastify.get('/v8/artifacts/status', () => __awaiter(this, void 0, void 0, function* () {
+            // GHActions cache API doesn't support this endpoint
+            return { status: 'enabled' };
+        }));
+        // Check cache status for the specified artifact
+        fastify.head('/v8/artifacts/:hash', (request, reply) => __awaiter(this, void 0, void 0, function* () {
+            const hash = request.params.hash;
+            request.log.info(`Status of artifact for ${hash}`);
+            const result = yield getCache(request, hash);
+            if (result === null) {
+                reply.code(404);
+                return { ok: false };
+            }
+            const [size, , artifactTag] = result;
+            if (size) {
+                reply.header('Content-Length', size);
+            }
+            reply.header('Content-Type', 'application/octet-stream');
+            if (artifactTag) {
+                reply.header('x-artifact-tag', artifactTag);
+            }
+            return reply.send(null);
+        }));
         // Handle streaming request body
         // https://www.fastify.io/docs/latest/Reference/ContentTypeParser/#catch-all
         fastify.addContentTypeParser('application/octet-stream', (_req, _payload, done) => {
